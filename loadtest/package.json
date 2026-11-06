@@ -5,7 +5,7 @@
   "description": "Q (Day 13, \"yük testi — temel senaryo\"): npm workspaces DIŞINDA, e2e/ paketiyle AYNI sebeple (autocannon'ın kendi bağımlılık ağacı, servislerin runtime'ıyla hiçbir ilgisi yok).",
   "scripts": {
     "scenario": "node scenarios/basic-scenario.mjs",
-    "test": "node --test 'scenarios/__tests__/*.test.mjs'"
+    "test": "node --test"
   },
   "dependencies": {
     "autocannon": "^7.15.0"
