@@ -10,7 +10,8 @@ export function validatePasswordPolicy(password) {
     const errors = [];
     if (password.length < PASSWORD_MIN_LENGTH)
         errors.push(`Parola en az ${PASSWORD_MIN_LENGTH} karakter olmalı.`);
-    if (Buffer.byteLength(password, 'utf8') > PASSWORD_MAX_BYTES)
+    // TextEncoder (not Node's Buffer): this helper is also bundled into the web app, where Buffer does not exist.
+    if (new TextEncoder().encode(password).length > PASSWORD_MAX_BYTES)
         errors.push(`Parola en fazla ${PASSWORD_MAX_BYTES} bayt olabilir.`);
     if (!/[a-zçğıöşü]/.test(password))
         errors.push('Parola en az bir küçük harf içermeli.');
