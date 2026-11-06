@@ -1,9 +1,9 @@
 import { z } from 'zod';
 export const ProjectCreatedEventSchema = z.object({
-    projectId: z.string().uuid(),
+    projectId: z.guid(),
     startDate: z.string().date(),
     endDate: z.string().date(),
-    teamLeadId: z.string().uuid(),
+    teamLeadId: z.guid(),
     /**
      * Day 7 eklentisi: finance-service AR-GE maliyeti hesaplarken (bkz. calculate-arge-cost.usecase.ts)
      * integration-service'in `GET /week-ranges?startDate=&totalWeeks=` uç noktasını çağırmak zorunda
@@ -35,25 +35,25 @@ export const ProjectCreatedEventSchema = z.object({
     projeAdi: z.string().optional(),
 });
 export const ProjectCompletedEventSchema = z.object({
-    projectId: z.string().uuid(),
+    projectId: z.guid(),
     completedAt: z.string().datetime(),
 });
 export const WorkPackagePlannedEventSchema = z.object({
-    projectId: z.string().uuid(),
-    workPackageId: z.string().uuid(),
+    projectId: z.guid(),
+    workPackageId: z.guid(),
     masterWorkPackageId: z.number().int(),
 });
 export const WorkPackageCompletedEventSchema = z.object({
-    projectId: z.string().uuid(),
-    workPackageId: z.string().uuid(),
-    subWorkPackageId: z.string().uuid().nullable(),
-    employeeId: z.string().uuid(),
+    projectId: z.guid(),
+    workPackageId: z.guid(),
+    subWorkPackageId: z.guid().nullable(),
+    employeeId: z.guid(),
     onTime: z.boolean(),
 });
 export const WorkPackageDelayedEventSchema = z.object({
-    projectId: z.string().uuid(),
-    workPackageId: z.string().uuid(),
-    employeeId: z.string().uuid(),
+    projectId: z.guid(),
+    workPackageId: z.guid(),
+    employeeId: z.guid(),
     daysLate: z.number().int().positive(),
 });
 // RabbitMQ routing key sabitleri — publisher/consumer'lar string literal yazmak yerine bunu import eder

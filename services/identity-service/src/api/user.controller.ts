@@ -13,12 +13,12 @@ const ListQuerySchema = z.object({
 const CreateUserBodySchema = z.object({
   email: z.string().email(),
   temporaryPassword: z.string().min(1),
-  roleId: z.string().uuid(),
-  personnelId: z.string().uuid().nullable().optional(),
+  roleId: z.guid(),
+  personnelId: z.guid().nullable().optional(),
   dilTercihi: z.enum(['tr', 'en']).optional(),
 });
-const IdParam = z.object({ id: z.string().uuid() });
-const ChangeRoleBodySchema = z.object({ roleId: z.string().uuid() });
+const IdParam = z.object({ id: z.guid() });
+const ChangeRoleBodySchema = z.object({ roleId: z.guid() });
 const ChangePasswordBodySchema = z.object({ currentPassword: z.string().min(1), newPassword: z.string().min(1) });
 const UpdateRoleBodySchema = z
   .object({ ad: z.string().min(2).optional(), aciklama: z.string().nullable().optional(), aktif: z.boolean().optional() })

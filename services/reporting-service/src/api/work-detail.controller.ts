@@ -6,7 +6,7 @@ import type { ReportRepository } from '../infrastructure/database/report.reposit
 import type { ProjectServiceClient } from '../infrastructure/external/project-service.client';
 import type { PersonnelServiceClient } from '../infrastructure/external/personnel-service.client';
 
-const QuerySchema = z.object({ projectId: z.string().uuid() });
+const QuerySchema = z.object({ projectId: z.guid() });
 
 export function registerWorkDetailRoutes(
   app: FastifyInstance,

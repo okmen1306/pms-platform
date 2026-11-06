@@ -5,7 +5,7 @@ import { buildCompletionSummary } from '../core/use-cases/build-completion-summa
 import type { ReportRepository } from '../infrastructure/database/report.repository';
 
 const CompletionStatusQuerySchema = z.object({
-  projectId: z.string().uuid(),
+  projectId: z.guid(),
   scope: z.enum(['project', 'work-package', 'employee']).default('project'),
 });
 

@@ -7,7 +7,7 @@ import type { TeamRepository } from '../infrastructure/database/team.repository'
 import type { EmployeeRepository } from '../infrastructure/database/employee.repository';
 
 const CreateTeamBodySchema = z.object({ ad: z.string().min(1), aciklama: z.string().optional() });
-const AddMemberBodySchema = z.object({ employeeId: z.string().uuid(), sorumluluk: z.string().optional() });
+const AddMemberBodySchema = z.object({ employeeId: z.guid(), sorumluluk: z.string().optional() });
 
 export interface TeamControllerDeps {
   teamRepo: TeamRepository;
@@ -29,7 +29,7 @@ export function registerTeamRoutes(app: FastifyInstance, deps: TeamControllerDep
   });
 
   app.post('/teams/:id/members', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const body = AddMemberBodySchema.parse(request.body);
     const actorUserId = (request.headers['x-actor-id'] as string) ?? 'dev-actor';
     const result = await assignEmployeeToTeam(
@@ -45,13 +45,13 @@ export function registerTeamRoutes(app: FastifyInstance, deps: TeamControllerDep
   });
 
   app.get('/teams/:id/members', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const items = await deps.teamRepo.listMembers(id);
     return okList(items, { page: 1, pageSize: items.length, total: items.length });
   });
 
   app.get('/employees/:id/teams', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const items = await getEmployeeTeamsAndRoles(id, deps.teamRepo);
     return okList(items, { page: 1, pageSize: items.length, total: items.length });
   });

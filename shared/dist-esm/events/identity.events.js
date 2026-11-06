@@ -1,25 +1,25 @@
 import { z } from 'zod';
 export const RoleCreatedEventSchema = z.object({
-    roleId: z.string().uuid(),
+    roleId: z.guid(),
     kod: z.string(),
-    createdBy: z.string().uuid(),
+    createdBy: z.guid(),
 });
 export const RoleDeletedEventSchema = z.object({
-    roleId: z.string().uuid(),
+    roleId: z.guid(),
     kod: z.string(),
-    deletedBy: z.string().uuid(),
+    deletedBy: z.guid(),
 });
 export const RolePermissionsUpdatedEventSchema = z.object({
-    roleId: z.string().uuid(),
+    roleId: z.guid(),
     permissionKeys: z.array(z.string()),
-    updatedBy: z.string().uuid(),
+    updatedBy: z.guid(),
 });
 export const UserPermissionOverriddenEventSchema = z.object({
-    userId: z.string().uuid(),
+    userId: z.guid(),
     permissionKey: z.string(),
     canView: z.boolean().nullable(),
     canEdit: z.boolean().nullable(),
-    grantedBy: z.string().uuid(),
+    grantedBy: z.guid(),
     gerekce: z.string(),
 });
 export const IDENTITY_EVENTS = {

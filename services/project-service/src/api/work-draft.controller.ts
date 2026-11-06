@@ -18,13 +18,13 @@ export interface WorkDraftControllerDeps {
  */
 export function registerWorkDraftRoutes(app: FastifyInstance, deps: WorkDraftControllerDeps) {
   app.get('/projects/:id/work-draft', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const items = await deps.workDraftRepo.findByProject(id);
     return okList(items, { page: 1, pageSize: items.length, total: items.length });
   });
 
   app.post('/projects/:id/work-draft', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const body = WorkDraftCellDtoSchema.parse(request.body);
     const actorUserId = (request.headers['x-actor-id'] as string) ?? 'dev-actor';
     const cell = await setWorkDraftCell(id, body, actorUserId, deps.workDraftRepo, deps.projectRepo, deps.publishAudit);

@@ -11,7 +11,7 @@ export const LogEventSchema = z.object({
     level: z.enum(['info', 'warning', 'error', 'fatal']),
     service: z.string(),
     message: z.string(),
-    meta: z.record(z.unknown()).nullable().optional(),
+    meta: z.record(z.string(), z.unknown()).nullable().optional(),
 });
 export const LOG_EVENTS = {
     GENERIC: 'log.event',

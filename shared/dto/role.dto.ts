@@ -9,13 +9,13 @@ import { z } from 'zod';
  */
 
 export const RoleSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   kod: z.string().min(2).max(64),
   ad: z.string().min(2),
   aciklama: z.string().nullable(),
   sistemRolu: z.boolean().default(false),
   aktif: z.boolean().default(true),
-  createdBy: z.string().uuid().nullable(),
+  createdBy: z.guid().nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
@@ -30,7 +30,7 @@ export const CreateRoleDtoSchema = z.object({
   ad: z.string().min(2),
   aciklama: z.string().optional(),
   // "kopyala" senaryosu: yeni rol, mevcut bir rolün izin matrisiyle başlar
-  copyPermissionsFromRoleId: z.string().uuid().optional(),
+  copyPermissionsFromRoleId: z.guid().optional(),
 });
 export type CreateRoleDto = z.infer<typeof CreateRoleDtoSchema>;
 
@@ -42,7 +42,7 @@ export const UpdateRoleDtoSchema = z.object({
 export type UpdateRoleDto = z.infer<typeof UpdateRoleDtoSchema>;
 
 export const RolePermissionEntrySchema = z.object({
-  permissionId: z.string().uuid(),
+  permissionId: z.guid(),
   canView: z.boolean(),
   canEdit: z.boolean(),
 });

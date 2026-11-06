@@ -1,6 +1,6 @@
 import { z } from 'zod';
 export const ProjectCostRecalculatedEventSchema = z.object({
-    projectId: z.string().uuid(),
+    projectId: z.guid(),
     toplamGerceklesenMaliyetTl: z.number(),
     karMarjiYuzde: z.number().nullable(),
 });

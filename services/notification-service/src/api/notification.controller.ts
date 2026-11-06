@@ -36,7 +36,7 @@ export function registerNotificationRoutes(
   app.post('/email-templates/:kod/test-send', async (request) => {
     const { kod } = z.object({ kod: z.string() }).parse(request.params);
     const body = z
-      .object({ to: z.string().email(), dil: z.enum(['tr', 'en']).default('tr'), context: z.record(z.unknown()).default({}) })
+      .object({ to: z.string().email(), dil: z.enum(['tr', 'en']).default('tr'), context: z.record(z.string(), z.unknown()).default({}) })
       .parse(request.body);
     await sendTemplatedEmail({ templateCode: kod, dil: body.dil, to: body.to, context: body.context }, deps.templateRepo, deps.emailAdapter);
     return ok({ triggered: true });

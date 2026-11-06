@@ -7,13 +7,13 @@ import { z } from 'zod';
 export const AuditEventSchema = z.object({
   service: z.string(),
   eventType: z.enum(['CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'PERMISSION_CHANGE', 'VIEW_SENSITIVE']),
-  actorUserId: z.string().uuid().nullable(),
+  actorUserId: z.guid().nullable(),
   actorEmail: z.string().email().nullable(),
   entityType: z.string(),
-  entityId: z.string().uuid().nullable(),
+  entityId: z.guid().nullable(),
   ozet: z.string(),                 // "Aliye, Proje X'in 3. iş paketini tamamlandı işaretledi" gibi
-  oncekiDeger: z.record(z.unknown()).nullable().optional(),
-  yeniDeger: z.record(z.unknown()).nullable().optional(),
+  oncekiDeger: z.record(z.string(), z.unknown()).nullable().optional(),
+  yeniDeger: z.record(z.string(), z.unknown()).nullable().optional(),
   severity: z.enum(['info', 'warning', 'critical']).default('info'),
   ipAdresi: z.string().nullable().optional(),
 });

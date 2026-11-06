@@ -17,7 +17,7 @@ import { calculateTeamCostSummary } from '../core/use-cases/calculate-team-cost-
  */
 export function registerCostAnalysisRoutes(app: FastifyInstance, deps: { costRepo: CostRepository }) {
   app.get('/finance/projects/:id/costs', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const cost = await deps.costRepo.findByProject(id);
     if (!cost) throw new NotFoundError('Maliyet kaydı', id);
     return ok(cost);
@@ -29,21 +29,21 @@ export function registerCostAnalysisRoutes(app: FastifyInstance, deps: { costRep
    * uyarısıyla gösterilir (bkz. web/src/features/finance/ArgeCostPage.tsx).
    */
   app.get('/finance/projects/:id/personnel-weekly-cost', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const items = await deps.costRepo.listWeeklyCostsByProject(id);
     return okList(items, { page: 1, pageSize: items.length, total: items.length });
   });
 
   // B2 (Day 10): "finance tamamlama" — bkz. calculate-team-cost-summary.usecase.ts notu.
   app.get('/finance/projects/:id/team-cost-summary', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const items = await calculateTeamCostSummary(id, deps.costRepo);
     return okList(items, { page: 1, pageSize: items.length, total: items.length });
   });
 
   // B2 (Day 10): "finance tamamlama" — bkz. calculate-profit-margin.usecase.ts notu.
   app.get('/finance/projects/:id/profit-margin', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const result = await calculateProfitMargin(id, deps.costRepo);
     return ok(result);
   });

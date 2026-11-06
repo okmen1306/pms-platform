@@ -6,7 +6,7 @@ import type { AuditEventRepository } from '../infrastructure/database/audit.repo
 const AuditLogQuerySchema = PaginationQuerySchema.extend({
   service: z.string().min(1).optional(),
   entityType: z.string().min(1).optional(),
-  actorUserId: z.string().uuid().optional(),
+  actorUserId: z.guid().optional(),
   severity: z.enum(['info', 'warning', 'critical']).optional(),
   from: z.string().min(1).optional(),
   to: z.string().min(1).optional(),
@@ -27,7 +27,7 @@ export function registerAuditLogRoutes(app: FastifyInstance, deps: { auditRepo: 
   });
 
   app.get('/admin/audit-log/:id', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const found = await deps.auditRepo.findById(id);
     if (!found) throw new NotFoundError('Denetim kaydı', id);
     return ok(found);

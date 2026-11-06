@@ -56,7 +56,7 @@ export function registerEmployeeRoutes(app: FastifyInstance, deps: EmployeeContr
    * endpoint'e REST ile ulaşacak.
    */
   app.get('/employees/:id', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const callerPermissions = deps.getCallerPermissions(request);
     const row = await deps.employeeRepo.findById(id);
     if (!row) throw new NotFoundError('Personel', id);
@@ -76,7 +76,7 @@ export function registerEmployeeRoutes(app: FastifyInstance, deps: EmployeeContr
    * uygulanıyor — bkz. api-gateway CHANGELOG.md Day 7 notu.
    */
   app.get('/employees/:id/salary', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const row = await deps.employeeRepo.findById(id);
     if (!row) throw new NotFoundError('Personel', id);
     return ok({ id: row.id, maasTl: row.maas_tl });
@@ -96,7 +96,7 @@ export function registerEmployeeRoutes(app: FastifyInstance, deps: EmployeeContr
    * `/deactivate` uç noktası.
    */
   app.patch('/employees/:id', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const body = UpdateEmployeeBodySchema.parse(request.body);
     const actorUserId = (request.headers['x-actor-id'] as string) ?? 'dev-actor';
     const updated = await updateEmployee(id, body, actorUserId, deps.employeeRepo, deps.publishAudit, deps.publishEmployeeUpdated);
@@ -104,7 +104,7 @@ export function registerEmployeeRoutes(app: FastifyInstance, deps: EmployeeContr
   });
 
   app.patch('/employees/:id/deactivate', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const actorUserId = (request.headers['x-actor-id'] as string) ?? 'dev-actor';
     await deactivateEmployee(id, actorUserId, deps.employeeRepo, deps.publishAudit, deps.publishEmployeeUpdated, deps.hasAssignments);
     return ok({ deactivated: true });

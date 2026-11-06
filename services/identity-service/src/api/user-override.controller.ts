@@ -27,7 +27,7 @@ export interface UserOverrideControllerDeps {
  */
 export function registerUserOverrideRoutes(app: FastifyInstance, deps: UserOverrideControllerDeps) {
   app.post('/users/:id/permission-overrides', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const body = GrantUserPermissionOverrideDtoSchema.parse(request.body);
     const actorUserId = (request.headers['x-actor-id'] as string) ?? 'dev-actor';
 
@@ -59,14 +59,14 @@ export function registerUserOverrideRoutes(app: FastifyInstance, deps: UserOverr
    * bu olmadan mevcut override'ları gösteremezdi. Sadece AKTİF override'lar döner.
    */
   app.get('/users/:id/permission-overrides', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const items = await deps.permissionRepo.listUserOverrides(id);
     return okList(items, { page: 1, pageSize: items.length, total: items.length });
   });
 
   app.delete('/users/:id/permission-overrides/:overrideId', async (request) => {
     const { id, overrideId } = z
-      .object({ id: z.string().uuid(), overrideId: z.string().uuid() })
+      .object({ id: z.guid(), overrideId: z.guid() })
       .parse(request.params);
     const actorUserId = (request.headers['x-actor-id'] as string) ?? 'dev-actor';
     await revokeUserPermissionOverride(id, overrideId, actorUserId, deps.permissionRepo, deps.publishAudit);

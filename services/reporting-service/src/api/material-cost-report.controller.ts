@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { ok } from '@pms/shared';
 import type { FinanceServiceClient } from '../infrastructure/external/finance-service.client';
 
-const QuerySchema = z.object({ projectId: z.string().uuid() });
+const QuerySchema = z.object({ projectId: z.guid() });
 
 /**
  * B3 (Day 12): "material-cost-report.controller.ts" — ince proxy, bkz. finance-service.client.ts.

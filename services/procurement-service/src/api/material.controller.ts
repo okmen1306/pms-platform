@@ -9,7 +9,7 @@ import type { StockMovementRepository } from '../infrastructure/database/stock-m
 import type { IntegrationServiceClient } from '../infrastructure/external/integration-service.client';
 
 const CreateMaterialBodySchema = z.object({
-  projectId: z.string().uuid(),
+  projectId: z.guid(),
   malzemeTuru: z.string().min(1),
   malzemeAdi: z.string().min(1),
   teknikOzellik: z.string().optional(),
@@ -35,7 +35,7 @@ export interface MaterialControllerDeps {
 
 export function registerMaterialRoutes(app: FastifyInstance, deps: MaterialControllerDeps) {
   app.get('/materials', async (request) => {
-    const { projectId } = z.object({ projectId: z.string().uuid() }).parse(request.query);
+    const { projectId } = z.object({ projectId: z.guid() }).parse(request.query);
     const items = await deps.materialRepo.listByProject(projectId);
     return okList(items, { page: 1, pageSize: items.length, total: items.length });
   });
@@ -56,7 +56,7 @@ export function registerMaterialRoutes(app: FastifyInstance, deps: MaterialContr
   });
 
   app.patch('/materials/:id/override-rate', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const { newRate } = z.object({ newRate: z.number().positive() }).parse(request.body);
     const actorUserId = (request.headers['x-actor-id'] as string) ?? 'dev-actor';
     const updated = await overrideExchangeRate(id, newRate, actorUserId, deps.materialRepo, deps.publishAudit);
@@ -64,7 +64,7 @@ export function registerMaterialRoutes(app: FastifyInstance, deps: MaterialContr
   });
 
   app.get('/materials/:id/stock-movements', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const [items, currentStock] = await Promise.all([
       deps.stockMovementRepo.listByMaterial(id),
       deps.stockMovementRepo.currentStock(id),
@@ -73,7 +73,7 @@ export function registerMaterialRoutes(app: FastifyInstance, deps: MaterialContr
   });
 
   app.post('/materials/:id/stock-movements', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const body = StockMovementBodySchema.parse(request.body);
     const actorUserId = (request.headers['x-actor-id'] as string) ?? 'dev-actor';
     const created = await recordStockMovement(

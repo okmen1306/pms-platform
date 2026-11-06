@@ -18,7 +18,7 @@ const CreateRoleBodySchema = z.object({
   kod: z.string().regex(/^[a-z0-9_]+$/),
   ad: z.string().min(2),
   aciklama: z.string().optional(),
-  copyPermissionsFromRoleId: z.string().uuid().optional(),
+  copyPermissionsFromRoleId: z.guid().optional(),
 });
 
 const UpdatePermissionsBodySchema = z.object({ permissions: z.array(RolePermissionEntrySchema) });
@@ -47,7 +47,7 @@ export function registerRoleRoutes(app: FastifyInstance, deps: RoleControllerDep
   });
 
   app.delete('/roles/:id', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const actorUserId = (request.headers['x-actor-id'] as string) ?? 'dev-actor';
     await deleteRole(id, actorUserId, deps.roleRepo, deps.publishAudit, (event) =>
       deps.rabbit.publish(IDENTITY_EVENTS.ROLE_DELETED, event),
@@ -61,13 +61,13 @@ export function registerRoleRoutes(app: FastifyInstance, deps: RoleControllerDep
    * RolePermissionCatalogEntry yorumu — RoleManagementPage'in Day 12'deki sarı uyarısı buydu).
    */
   app.get('/roles/:id/permissions', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const catalog = await deps.permissionRepo.findRolePermissions(id);
     return okList(catalog, { page: 1, pageSize: catalog.length, total: catalog.length });
   });
 
   app.put('/roles/:id/permissions', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const body = UpdatePermissionsBodySchema.parse(request.body);
     const actorUserId = (request.headers['x-actor-id'] as string) ?? 'dev-actor';
     await updateRolePermissions(

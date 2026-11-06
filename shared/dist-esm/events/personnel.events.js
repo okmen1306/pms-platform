@@ -19,7 +19,7 @@ import { z } from 'zod';
  * `GET /employees/:id/salary` senkron REST çağrısıyla, izin kontrolüyle okunur).
  */
 export const EmployeeChangedEventSchema = z.object({
-    employeeId: z.string().uuid(),
+    employeeId: z.guid(),
     adSoyad: z.string().min(1),
     durum: z.enum(['active', 'inactive']),
 });

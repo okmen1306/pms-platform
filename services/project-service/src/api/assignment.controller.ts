@@ -32,7 +32,7 @@ export interface AssignmentControllerDeps {
 export function registerAssignmentRoutes(app: FastifyInstance, deps: AssignmentControllerDeps) {
   app.post('/projects/:id/assignments', async (request) => {
     // RBAC (Day 21, G-01): gateway'de `project.records` edit ile zorlanır (ekip_lideri + sirket_yoneticisi).
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const body = CreateAssignmentDtoSchema.parse(request.body);
     const actorUserId = (request.headers['x-actor-id'] as string) ?? 'dev-actor';
 
@@ -51,9 +51,9 @@ export function registerAssignmentRoutes(app: FastifyInstance, deps: AssignmentC
   });
 
   app.get('/projects/:id/assignments', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     // Day 20: `?employeeId=` filtresi (roadmap Bölüm 8) — personelin bu projedeki atamaları.
-    const { employeeId } = z.object({ employeeId: z.string().uuid().optional() }).parse(request.query);
+    const { employeeId } = z.object({ employeeId: z.guid().optional() }).parse(request.query);
     const items = await deps.assignmentRepo.findByProject(id, { employeeId });
     return okList(items, { page: 1, pageSize: items.length, total: items.length });
   });
@@ -64,7 +64,7 @@ export function registerAssignmentRoutes(app: FastifyInstance, deps: AssignmentC
    * tablosuna değil, bu REST uç noktasına).
    */
   app.get('/employees/:id/calendar', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const range = z
       .object({ from: z.string().date().optional(), to: z.string().date().optional() })
       .parse(request.query);
@@ -81,7 +81,7 @@ export function registerAssignmentRoutes(app: FastifyInstance, deps: AssignmentC
    * bir ön-kontrol.
    */
   app.get('/projects/:id/assignments/conflict-check', async (request) => {
-    z.object({ id: z.string().uuid() }).parse(request.params);
+    z.object({ id: z.guid() }).parse(request.params);
     const query = AssignmentConflictCheckQuerySchema.parse(request.query);
     const result = await checkAssignmentConflict(query, deps.assignmentRepo);
     return ok(result);
@@ -93,14 +93,14 @@ export function registerAssignmentRoutes(app: FastifyInstance, deps: AssignmentC
    * doğrular (Kırılmaz Kural — notification, project-service'in tablosuna doğrudan erişemez).
    */
   app.get('/assignments/:id', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const found = await deps.assignmentRepo.findById(id);
     if (!found) throw new NotFoundError('Personel ataması', id);
     return ok(found);
   });
 
   app.patch('/assignments/:id/complete', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const body = MarkAssignmentCompleteDtoSchema.parse(request.body ?? {});
     const actorUserId = (request.headers['x-actor-id'] as string) ?? 'dev-actor';
     const updated = await markAssignmentComplete(

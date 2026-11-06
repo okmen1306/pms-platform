@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { okList } from '@pms/shared';
 import type { PerformanceServiceClient } from '../infrastructure/external/performance-service.client';
 
-const QuerySchema = z.object({ projectId: z.string().uuid() });
+const QuerySchema = z.object({ projectId: z.guid() });
 
 export function registerTeamPerformanceReportRoutes(app: FastifyInstance, deps: { performanceServiceClient: PerformanceServiceClient }) {
   app.get('/reports/team-performance', async (request) => {

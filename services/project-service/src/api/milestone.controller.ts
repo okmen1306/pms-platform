@@ -18,14 +18,14 @@ export interface MilestoneControllerDeps {
  */
 export function registerMilestoneRoutes(app: FastifyInstance, deps: MilestoneControllerDeps) {
   app.get('/projects/:id/milestones', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const items = await deps.milestoneRepo.findByProject(id);
     return okList(items, { page: 1, pageSize: items.length, total: items.length });
   });
 
   app.post('/projects/:id/milestones', async (request) => {
     // RBAC (Day 21, G-01): gateway'de `project.records` edit ile zorlanır (ekip_lideri + sirket_yoneticisi; bkz. docs/testing/rbac-matrix.md).
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const body = CreateMilestoneDtoSchema.parse(request.body);
     const actorUserId = (request.headers['x-actor-id'] as string) ?? 'dev-actor';
     const created = await createMilestone(id, body, actorUserId, deps.milestoneRepo, deps.projectRepo, deps.publishAudit);

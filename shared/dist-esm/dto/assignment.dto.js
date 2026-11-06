@@ -1,10 +1,10 @@
 import { z } from 'zod';
 export const AssignmentSchema = z.object({
-    id: z.string().uuid(),
-    projectId: z.string().uuid(),
-    workPackageId: z.string().uuid(),
-    subWorkPackageId: z.string().uuid().nullable(),
-    employeeId: z.string().uuid(),
+    id: z.guid(),
+    projectId: z.guid(),
+    workPackageId: z.guid(),
+    subWorkPackageId: z.guid().nullable(),
+    employeeId: z.guid(),
     baslangicTarihi: z.string().date(),
     bitisTarihi: z.string().date(),
     tamamlandiMi: z.boolean().default(false),
@@ -13,9 +13,9 @@ export const AssignmentSchema = z.object({
 });
 export const CreateAssignmentDtoSchema = z
     .object({
-    workPackageId: z.string().uuid(),
-    subWorkPackageId: z.string().uuid().optional(),
-    employeeId: z.string().uuid(),
+    workPackageId: z.guid(),
+    subWorkPackageId: z.guid().optional(),
+    employeeId: z.guid(),
     baslangicTarihi: z.string().date(),
     bitisTarihi: z.string().date(),
 })
@@ -25,8 +25,8 @@ export const CreateAssignmentDtoSchema = z
 });
 // project-service, 409 ASSIGNMENT_CONFLICT dönerken bu şekli kullanır (bkz. shared/errors)
 export const AssignmentConflictDetailSchema = z.object({
-    employeeId: z.string().uuid(),
-    conflictingAssignmentIds: z.array(z.string().uuid()),
+    employeeId: z.guid(),
+    conflictingAssignmentIds: z.array(z.guid()),
 });
 export const MarkAssignmentCompleteDtoSchema = z.object({
     tamamlanmaTarihi: z.string().datetime().optional(), // verilmezse server NOW() kullanır
@@ -37,8 +37,8 @@ export const MarkAssignmentCompleteDtoSchema = z.object({
 // projectId query'de YOK — çakışma personel bazlı, projeler arası kontrol edilir, bkz.
 // assignment.repository.ts findOverlapping).
 export const AssignmentConflictCheckQuerySchema = z.object({
-    employeeId: z.string().uuid(),
+    employeeId: z.guid(),
     baslangicTarihi: z.string().date(),
     bitisTarihi: z.string().date(),
-    excludeAssignmentId: z.string().uuid().optional(),
+    excludeAssignmentId: z.guid().optional(),
 });

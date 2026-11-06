@@ -12,7 +12,7 @@ export function registerPermissionRoutes(app: FastifyInstance, deps: { permissio
   });
 
   app.get('/users/:id/effective-permissions', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const items = await getEffectivePermissions(id, deps.permissionRepo);
     return okList(items, { page: 1, pageSize: items.length, total: items.length });
   });

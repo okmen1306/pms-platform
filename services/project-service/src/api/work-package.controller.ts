@@ -38,14 +38,14 @@ export function registerWorkPackageRoutes(app: FastifyInstance, deps: WorkPackag
   });
 
   app.get('/projects/:id/work-packages', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const items = await deps.workPackageRepo.listByProject(id);
     return okList(items, { page: 1, pageSize: items.length, total: items.length });
   });
 
   app.post('/projects/:id/work-packages', async (request) => {
     // RBAC (Day 21, G-01): gateway'de `project.records` edit ile zorlanır (ekip_lideri + sirket_yoneticisi).
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const body = PlanWorkPackageBodySchema.parse(request.body);
     const actorUserId = (request.headers['x-actor-id'] as string) ?? 'dev-actor';
     const created = await planWorkPackage(
@@ -61,7 +61,7 @@ export function registerWorkPackageRoutes(app: FastifyInstance, deps: WorkPackag
   });
 
   app.post('/work-packages/:id/sub-work-packages', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const body = AddSubWorkPackageBodySchema.parse(request.body);
     const actorUserId = (request.headers['x-actor-id'] as string) ?? 'dev-actor';
     const created = await addSubWorkPackage(id, body, actorUserId, deps.workPackageRepo, deps.publishAudit);
@@ -69,13 +69,13 @@ export function registerWorkPackageRoutes(app: FastifyInstance, deps: WorkPackag
   });
 
   app.get('/work-packages/:id/sub-work-packages', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const items = await deps.workPackageRepo.listSubWorkPackages(id);
     return okList(items, { page: 1, pageSize: items.length, total: items.length });
   });
 
   app.patch('/sub-work-packages/:id', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const body = UpdateSubWorkPackageBodySchema.parse(request.body);
     const updated = await deps.workPackageRepo.updateSubWorkPackage(id, {
       ad: body.ad,
@@ -86,7 +86,7 @@ export function registerWorkPackageRoutes(app: FastifyInstance, deps: WorkPackag
   });
 
   app.delete('/sub-work-packages/:id', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     await deps.workPackageRepo.deleteSubWorkPackage(id);
     return ok({ deleted: true });
   });

@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { ok, NotFoundError } from '@pms/shared';
 import type { ReportRepository } from '../infrastructure/database/report.repository';
 
-const QuerySchema = z.object({ projectId: z.string().uuid() });
+const QuerySchema = z.object({ projectId: z.guid() });
 
 /**
  * B3 (Day 12) + Day 13 düzeltmesi: "project-planner.controller.ts" — roadmap dosya ağacında

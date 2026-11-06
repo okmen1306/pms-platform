@@ -9,22 +9,22 @@ export const ProjectStatusSchema = z.enum([
 export type ProjectStatus = z.infer<typeof ProjectStatusSchema>;
 
 export const ProjectSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   projeAdi: z.string().min(2),
   baslangicTarihi: z.string().date(),
   bitisTarihi: z.string().date(),
   sureHafta: z.number().int().positive(),
-  productGroupId: z.string().uuid(),
-  productId: z.string().uuid(),
+  productGroupId: z.guid(),
+  productId: z.guid(),
   durum: ProjectStatusSchema,
-  ekipLideriId: z.string().uuid(),
+  ekipLideriId: z.guid(),
   // Maliyet alanları: sadece finance.cost_analysis izni olanlara döner (bkz. DTO serialization)
   tahminiMaliyetTl: z.number().nullable().optional(),
   satisFiyatiTl: z.number().nullable().optional(),
   danismanlikMaliyetiTl: z.number().default(0),
   paketlemeGonderimMaliyetiTl: z.number().default(0),
   idariMaliyetOrani: z.number().min(0).max(1).default(0),
-  createdBy: z.string().uuid(),
+  createdBy: z.guid(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
@@ -34,9 +34,9 @@ export const CreateProjectDtoSchema = z.object({
   projeAdi: z.string().min(2),
   baslangicTarihi: z.string().date(),
   bitisTarihi: z.string().date(),
-  productGroupId: z.string().uuid(),
-  productId: z.string().uuid(),
-  ekipLideriId: z.string().uuid(),
+  productGroupId: z.guid(),
+  productId: z.guid(),
+  ekipLideriId: z.guid(),
   tahminiMaliyetTl: z.number().positive().optional(),
   satisFiyatiTl: z.number().positive().optional(),
   danismanlikMaliyetiTl: z.number().min(0).default(0),
@@ -49,8 +49,8 @@ export const CreateProjectDtoSchema = z.object({
 export type CreateProjectDto = z.infer<typeof CreateProjectDtoSchema>;
 
 export const WorkPackageSchema = z.object({
-  id: z.string().uuid(),
-  projectId: z.string().uuid(),
+  id: z.guid(),
+  projectId: z.guid(),
   masterWorkPackageId: z.number().int(),
   baslangicTarihi: z.string().date().nullable(),
   bitisTarihi: z.string().date().nullable(),
@@ -59,8 +59,8 @@ export const WorkPackageSchema = z.object({
 export type WorkPackage = z.infer<typeof WorkPackageSchema>;
 
 export const SubWorkPackageSchema = z.object({
-  id: z.string().uuid(),
-  workPackageId: z.string().uuid(),
+  id: z.guid(),
+  workPackageId: z.guid(),
   ad: z.string().min(1),
   baslangicHafta: z.number().int().positive(),
   bitisHafta: z.number().int().positive(),
@@ -73,15 +73,15 @@ export const SubWorkPackageSchema = z.object({
 export type SubWorkPackage = z.infer<typeof SubWorkPackageSchema>;
 
 export const TeamWeeklyAllocationDtoSchema = z.object({
-  teamId: z.string().uuid(),
+  teamId: z.guid(),
   haftaNo: z.number().int().positive(),
   planlananSureHafta: z.number().positive(),
 });
 export type TeamWeeklyAllocationDto = z.infer<typeof TeamWeeklyAllocationDtoSchema>;
 
 export const MilestoneSchema = z.object({
-  id: z.string().uuid(),
-  projectId: z.string().uuid(),
+  id: z.guid(),
+  projectId: z.guid(),
   tarih: z.string().date(),
   baslik: z.string().min(1),
   aciklama: z.string().nullable(),
@@ -108,7 +108,7 @@ export type CreateMilestoneDto = z.infer<typeof CreateMilestoneDtoSchema>;
  * route'una gerek yok.
  */
 export const WorkDraftCellDtoSchema = z.object({
-  workPackageId: z.string().uuid(),
+  workPackageId: z.guid(),
   haftaNo: z.number().int().positive(),
   boyali: z.boolean().default(true),
 });

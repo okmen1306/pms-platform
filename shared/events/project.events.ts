@@ -1,10 +1,10 @@
 import { z } from 'zod';
 
 export const ProjectCreatedEventSchema = z.object({
-  projectId: z.string().uuid(),
+  projectId: z.guid(),
   startDate: z.string().date(),
   endDate: z.string().date(),
-  teamLeadId: z.string().uuid(),
+  teamLeadId: z.guid(),
   /**
    * Day 7 eklentisi: finance-service AR-GE maliyeti hesaplarken (bkz. calculate-arge-cost.usecase.ts)
    * integration-service'in `GET /week-ranges?startDate=&totalWeeks=` uç noktasını çağırmak zorunda
@@ -38,31 +38,31 @@ export const ProjectCreatedEventSchema = z.object({
 export type ProjectCreatedEvent = z.infer<typeof ProjectCreatedEventSchema>;
 
 export const ProjectCompletedEventSchema = z.object({
-  projectId: z.string().uuid(),
+  projectId: z.guid(),
   completedAt: z.string().datetime(),
 });
 export type ProjectCompletedEvent = z.infer<typeof ProjectCompletedEventSchema>;
 
 export const WorkPackagePlannedEventSchema = z.object({
-  projectId: z.string().uuid(),
-  workPackageId: z.string().uuid(),
+  projectId: z.guid(),
+  workPackageId: z.guid(),
   masterWorkPackageId: z.number().int(),
 });
 export type WorkPackagePlannedEvent = z.infer<typeof WorkPackagePlannedEventSchema>;
 
 export const WorkPackageCompletedEventSchema = z.object({
-  projectId: z.string().uuid(),
-  workPackageId: z.string().uuid(),
-  subWorkPackageId: z.string().uuid().nullable(),
-  employeeId: z.string().uuid(),
+  projectId: z.guid(),
+  workPackageId: z.guid(),
+  subWorkPackageId: z.guid().nullable(),
+  employeeId: z.guid(),
   onTime: z.boolean(),
 });
 export type WorkPackageCompletedEvent = z.infer<typeof WorkPackageCompletedEventSchema>;
 
 export const WorkPackageDelayedEventSchema = z.object({
-  projectId: z.string().uuid(),
-  workPackageId: z.string().uuid(),
-  employeeId: z.string().uuid(),
+  projectId: z.guid(),
+  workPackageId: z.guid(),
+  employeeId: z.guid(),
   daysLate: z.number().int().positive(),
 });
 export type WorkPackageDelayedEvent = z.infer<typeof WorkPackageDelayedEventSchema>;

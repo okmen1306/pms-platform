@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // identity_permissions kataloğu — her yeni sayfa/aksiyon eklendiğinde buraya bir kayıt düşer.
 export const PermissionSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   permissionKey: z.string().min(3), // 'finance.cost_analysis', 'admin.roles.manage', vb.
   grup: z.string(),                  // UI gruplama: 'Finans', 'Personel', 'Proje', 'Admin'
   ad: z.string(),
@@ -20,7 +20,7 @@ export type EffectivePermission = z.infer<typeof EffectivePermissionSchema>;
 
 export const GrantUserPermissionOverrideDtoSchema = z
   .object({
-    permissionId: z.string().uuid(),
+    permissionId: z.guid(),
     canView: z.boolean().nullable().optional(),
     canEdit: z.boolean().nullable().optional(),
     gerekce: z.string().min(5, 'Gerekçe zorunludur (denetim kaydı için)'),

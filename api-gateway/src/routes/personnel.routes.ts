@@ -25,7 +25,7 @@ export async function registerPersonnelRoutes(
     '/personnel/employees/:id/salary',
     { preHandler: [deps.authenticate, deps.requirePermission(PERMISSION_KEYS.PERSONNEL_SALARY)] },
     async (request) => {
-      const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+      const { id } = z.object({ id: z.guid() }).parse(request.params);
       const upstream = await fetch(new URL(`/employees/${id}/salary`, deps.personnelServiceUrl));
       if (!upstream.ok) throw new ServiceUnavailableError('personnel-service');
       const body = (await upstream.json()) as any; // NOT: fetch tiplemesi Promise<unknown> döner (bkz. CHANGELOG.md Day 7 Q notu)

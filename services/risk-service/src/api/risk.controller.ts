@@ -7,8 +7,8 @@ import { listRisksByProject } from '../core/use-cases/list-risks-by-project.usec
 import type { RiskRepository } from '../infrastructure/database/risk.repository';
 
 const CreateRiskBodySchema = z.object({
-  workPackageId: z.string().uuid().optional(),
-  subWorkPackageId: z.string().uuid().optional(),
+  workPackageId: z.guid().optional(),
+  subWorkPackageId: z.guid().optional(),
   riskAdi: z.string().min(1),
   aciklama: z.string().optional(),
   olasilik: z.number().int().min(1).max(5),
@@ -27,13 +27,13 @@ const UpdateRiskBodySchema = z.object({
 
 export function registerRiskRoutes(app: FastifyInstance, deps: { riskRepo: RiskRepository; publishAudit: AuditPublisherFn }) {
   app.get('/projects/:id/risks', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const items = await listRisksByProject(id, deps.riskRepo);
     return okList(items, { page: 1, pageSize: items.length, total: items.length });
   });
 
   app.post('/projects/:id/risks', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const body = CreateRiskBodySchema.parse(request.body);
     const actorUserId = (request.headers['x-actor-id'] as string) ?? 'dev-actor';
     const created = await createRisk(
@@ -55,7 +55,7 @@ export function registerRiskRoutes(app: FastifyInstance, deps: { riskRepo: RiskR
   });
 
   app.patch('/risks/:id', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     const body = UpdateRiskBodySchema.parse(request.body);
     const actorUserId = (request.headers['x-actor-id'] as string) ?? 'dev-actor';
     const updated = await updateRisk(
@@ -76,7 +76,7 @@ export function registerRiskRoutes(app: FastifyInstance, deps: { riskRepo: RiskR
   });
 
   app.delete('/risks/:id', async (request) => {
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.guid() }).parse(request.params);
     await deps.riskRepo.delete(id);
     return ok({ deleted: true });
   });

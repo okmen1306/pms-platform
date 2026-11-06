@@ -5,11 +5,11 @@ import { z } from 'zod';
  * her zaman ayrı bir "public" şema kullanılır (bkz. UserPublicSchema).
  */
 export const UserSchema = z.object({
-    id: z.string().uuid(),
+    id: z.guid(),
     email: z.string().email(),
-    roleId: z.string().uuid(),
+    roleId: z.guid(),
     isSuperAdmin: z.boolean().default(false),
-    personnelId: z.string().uuid().nullable(),
+    personnelId: z.guid().nullable(),
     dilTercihi: z.enum(['tr', 'en']).default('tr'),
     isActive: z.boolean().default(true),
     lastLoginAt: z.string().datetime().nullable(),
@@ -21,8 +21,8 @@ export const UserPublicSchema = UserSchema.omit({});
 export const CreateUserDtoSchema = z.object({
     email: z.string().email(),
     password: z.string().min(8, 'Parola en az 8 karakter olmalı'),
-    roleId: z.string().uuid(),
-    personnelId: z.string().uuid().nullable().optional(),
+    roleId: z.guid(),
+    personnelId: z.guid().nullable().optional(),
     dilTercihi: z.enum(['tr', 'en']).default('tr'),
 });
 export const LoginDtoSchema = z.object({
@@ -30,16 +30,16 @@ export const LoginDtoSchema = z.object({
     password: z.string().min(1),
 });
 export const AssignRoleDtoSchema = z.object({
-    roleId: z.string().uuid(),
+    roleId: z.guid(),
 });
 // JWT payload sözleşmesi — api-gateway bunu üretir, tüm servisler bunu okur.
 export const JwtPayloadSchema = z.object({
-    sub: z.string().uuid(), // user id
+    sub: z.guid(), // user id
     email: z.string().email(),
-    roleId: z.string().uuid(),
+    roleId: z.guid(),
     roleKod: z.string(),
     isSuperAdmin: z.boolean(),
-    personnelId: z.string().uuid().nullable(),
+    personnelId: z.guid().nullable(),
     dilTercihi: z.enum(['tr', 'en']),
     // Day 22: geçici parolayla giriş — true iken gateway yalnızca parola değiştirme/izin okuma uçlarına izin verir.
     // Opsiyonel: bayraktan ÖNCE üretilmiş token'lar (ve test token'ları) false sayılır.

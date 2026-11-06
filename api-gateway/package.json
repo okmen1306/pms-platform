@@ -18,7 +18,7 @@
     "@fastify/http-proxy": "^11.6.2",
     "@fastify/rate-limit": "^11.2.0",
     "jsonwebtoken": "^9.0.2",
-    "zod": "^3.23.8",
+    "zod": "^4.6.7",
     "ioredis": "^5.4.1",
     "dotenv": "^16.4.5"
   },

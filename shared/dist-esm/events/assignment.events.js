@@ -1,15 +1,15 @@
 import { z } from 'zod';
 export const AssignmentCreatedEventSchema = z.object({
-    assignmentId: z.string().uuid(),
-    projectId: z.string().uuid(),
-    employeeId: z.string().uuid(),
-    workPackageId: z.string().uuid(),
+    assignmentId: z.guid(),
+    projectId: z.guid(),
+    employeeId: z.guid(),
+    workPackageId: z.guid(),
     start: z.string().date(),
     end: z.string().date(),
 });
 export const AssignmentConflictDetectedEventSchema = z.object({
-    employeeId: z.string().uuid(),
-    conflictingAssignmentIds: z.array(z.string().uuid()),
+    employeeId: z.guid(),
+    conflictingAssignmentIds: z.array(z.guid()),
 });
 export const ASSIGNMENT_EVENTS = {
     CREATED: 'assignment.created',
