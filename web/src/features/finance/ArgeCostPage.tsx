@@ -42,7 +42,7 @@ export function ArgeCostPage() {
         <input
           value={projectId}
           onChange={(e) => setProjectId(e.target.value)}
-          placeholder="Proje ID'si (Day 8+'da proje seçici ile değişecek)"
+          placeholder="Proje ID'si"
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono"
         />
 

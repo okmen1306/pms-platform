@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { fetchEmployees, type EmployeeListItem } from './personnel.api';
 import { DataTable, type DataTableColumn } from '../../shared/components/DataTable';
 import { CurrencyBadge } from '../../shared/components/CurrencyBadge';
-import { RoleGuard } from '../../shared/components/RoleGuard';
+import { usePermission } from '../../shared/hooks/usePermission';
 import { PERMISSION_KEYS } from '@pms/shared';
 
 /**
@@ -14,6 +14,7 @@ import { PERMISSION_KEYS } from '@pms/shared';
  */
 export function EmployeeListPage() {
   const { t } = useTranslation();
+  const canSeeSalary = usePermission(PERMISSION_KEYS.PERSONNEL_SALARY);
   const { data: employees = [], isLoading } = useQuery({
     queryKey: ['employees'],
     queryFn: () => fetchEmployees(),
@@ -35,6 +36,16 @@ export function EmployeeListPage() {
         </span>
       ),
     },
+    // Salary column only for users with `personnel.salary`; the backend also returns null without it (fail-closed).
+    ...(canSeeSalary
+      ? [
+          {
+            key: 'maas',
+            header: 'Maaş',
+            render: (e: EmployeeListItem) => (e.maasTl === null ? '—' : <CurrencyBadge amountTl={e.maasTl} showUsd={false} />),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -42,14 +53,6 @@ export function EmployeeListPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold text-gray-900">Personel</h1>
       </div>
-
-      <RoleGuard permissionKey={PERMISSION_KEYS.PERSONNEL_SALARY}>
-        {/* Maaş özet kartı sadece izinli kullanıcıya görünür — DataTable'a ayrı kolon
-            eklemek yerine, madde 18 kuralına uygun şekilde tamamen ayrı bir blok olarak. */}
-        <div className="text-xs text-gray-500">
-          Maaş bilgisi bu görünümde özet kart olarak eklenecek (Day 22, gerçek izin API'si).
-        </div>
-      </RoleGuard>
 
       <DataTable
         columns={columns}
