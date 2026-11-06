@@ -8,6 +8,19 @@ It has a React frontend, a Supabase (PostgreSQL) database with row-level securit
 > admin console are wired end-to-end through the API gateway. Event-driven completion flows are still in progress.
 > Code comments and domain names are mostly in Turkish because the target market is Turkey. The UI supports Turkish and English (i18n).
 
+## Screenshots
+
+The React frontend, rendered with sample data (UI language: Turkish).
+
+**Projects:** list with status and team-lead filters
+![Projects](docs/screenshots/projects.png)
+
+**Permission matrix:** per-role view/edit grants, enforced by the API gateway and by Postgres RLS
+![Permission matrix](docs/screenshots/permission-matrix.png)
+
+**User management:** role assignment, temporary passwords with forced change, per-user permission overrides
+![User management](docs/screenshots/user-management.png)
+
 ## Tech stack
 
 | Layer | Technologies |
