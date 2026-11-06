@@ -1,0 +1,35 @@
+{
+  "name": "pms-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Proje Yönetim Sistemi — mikroservis monorepo",
+  "workspaces": [
+    "shared",
+    "api-gateway",
+    "services/*",
+    "web"
+  ],
+  "scripts": {
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:rls": "vitest run tests/rls",
+    "test:events": "vitest run tests/events",
+    "test:cache": "vitest run tests/cache",
+    "test:e2e": "cd e2e && npm test",
+    "test:load": "cd loadtest && npm test",
+    "loadtest:run": "cd loadtest && npm run scenario",
+    "security:audit": "npm audit --audit-level=moderate",
+    "build": "npm run build --workspaces --if-present",
+    "dev:infra": "docker compose up -d rabbitmq redis",
+    "verify:health": "node scripts/verify-services-up.mjs",
+    "test:scripts": "vitest run tests/scripts"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "vitest": "^5.0.1",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "eslint-plugin-react-hooks": "^4.6.2"
+  }
+}

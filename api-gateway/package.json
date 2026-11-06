@@ -1,0 +1,33 @@
+{
+  "name": "@pms/api-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tek giriş kapısı: JWT doğrulama, rol/izin bazlı proxy, rate limit",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "npm run build --workspace=shared --if-present && tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "@pms/shared": "*",
+    "fastify": "^5.12.5",
+    "@fastify/cors": "^11.3.0",
+    "@fastify/http-proxy": "^11.6.2",
+    "@fastify/rate-limit": "^11.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "zod": "^3.23.8",
+    "ioredis": "^5.4.1",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "tsx": "^4.16.5",
+    "vitest": "^5.0.1",
+    "ioredis-mock": "^8.9.0",
+    "@types/node": "^22.5.0",
+    "@types/jsonwebtoken": "^9.0.6"
+  }
+}

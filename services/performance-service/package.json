@@ -1,0 +1,33 @@
+{
+  "name": "@pms/performance-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Personel/ekip performans puanlama ve endeks",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "npm run build --workspace=shared --if-present && tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "@pms/shared": "*",
+    "fastify": "^5.12.5",
+    "@fastify/cors": "^11.3.0",
+    "zod": "^3.23.8",
+    "amqplib": "^0.10.4",
+    "ioredis": "^5.4.1",
+    "@supabase/supabase-js": "^2.45.4",
+    "dotenv": "^16.4.5",
+    "pino": "^9.3.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "tsx": "^4.16.5",
+    "vitest": "^5.0.1",
+    "supertest": "^7.0.0",
+    "@types/node": "^22.5.0",
+    "@types/amqplib": "^0.10.5"
+  }
+}

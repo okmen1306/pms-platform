@@ -1,0 +1,4 @@
+-- 011_indexes.sql
+-- Day 0: placeholder. İçerik roadmap.md Bölüm 4/11 SQL şemasına göre, ilgili servisin
+-- geliştirildiği günde (bkz. roadmap.md Bölüm 14.2) doldurulacak. Şimdi boş bırakılıyor
+-- çünkü Supabase kurulumu bilinçli olarak projenin sonuna bırakıldı (README.md).

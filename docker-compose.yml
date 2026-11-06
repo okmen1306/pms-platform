@@ -1,0 +1,98 @@
+version: '3.9'
+
+# Day 0: sadece altyapı (RabbitMQ + Redis) ve servis iskeletleri (health-check) ayakta.
+# Supabase kurulumu bilinçli olarak projenin sonuna bırakıldı (bkz. README.md).
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports: ["5672:5672", "15672:15672"]
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: secret
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api-gateway:
+    build: ./api-gateway
+    ports: ["3000:3000"]
+    depends_on: [rabbitmq, redis]
+    env_file: ./api-gateway/.env
+
+  identity-service:
+    build: ./services/identity-service
+    ports: ["3001:3001"]
+    depends_on: [rabbitmq, redis]
+    env_file: ./services/identity-service/.env
+
+  personnel-service:
+    build: ./services/personnel-service
+    ports: ["3002:3002"]
+    depends_on: [rabbitmq, redis]
+    env_file: ./services/personnel-service/.env
+
+  project-service:
+    build: ./services/project-service
+    ports: ["3003:3003"]
+    depends_on: [rabbitmq, redis]
+    env_file: ./services/project-service/.env
+
+  procurement-service:
+    build: ./services/procurement-service
+    ports: ["3004:3004"]
+    depends_on: [rabbitmq, redis]
+    env_file: ./services/procurement-service/.env
+
+  integration-service:
+    build: ./services/integration-service
+    ports: ["3005:3005"]
+    depends_on: [rabbitmq, redis]
+    env_file: ./services/integration-service/.env
+
+  finance-service:
+    build: ./services/finance-service
+    ports: ["3006:3006"]
+    depends_on: [rabbitmq, redis]
+    env_file: ./services/finance-service/.env
+
+  performance-service:
+    build: ./services/performance-service
+    ports: ["3007:3007"]
+    depends_on: [rabbitmq, redis]
+    env_file: ./services/performance-service/.env
+
+  risk-service:
+    build: ./services/risk-service
+    ports: ["3008:3008"]
+    depends_on: [rabbitmq, redis]
+    env_file: ./services/risk-service/.env
+
+  notification-service:
+    build: ./services/notification-service
+    ports: ["3009:3009"]
+    depends_on: [rabbitmq, redis]
+    env_file: ./services/notification-service/.env
+
+  reporting-service:
+    build: ./services/reporting-service
+    ports: ["3010:3010"]
+    depends_on: [rabbitmq, redis]
+    env_file: ./services/reporting-service/.env
+
+  logger-service:
+    build: ./services/logger-service
+    ports: ["3011:3011"]
+    depends_on: [rabbitmq, redis]
+    env_file: ./services/logger-service/.env

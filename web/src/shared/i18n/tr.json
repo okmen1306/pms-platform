@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "loginTitle": "Giriş Yap",
+    "email": "E-posta",
+    "password": "Parola",
+    "submit": "Giriş Yap",
+    "loading": "Giriş yapılıyor..."
+  },
+  "common": { "appName": "Proje Yönetim Sistemi" }
+}

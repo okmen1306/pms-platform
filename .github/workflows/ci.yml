@@ -1,0 +1,242 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  # Day 4 (Q): servis bazlı lint/test/build matrisi. Her workspace izole çalışır — bir
+  # serviste hata varsa diğerlerinin build'ini bloklamaz (fail-fast: false), böylece PR'de
+  # TÜM servislerin durumu tek seferde görülür.
+  test-and-build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace:
+          - shared
+          - api-gateway
+          - web
+          - services/identity-service
+          - services/personnel-service
+          - services/project-service
+          - services/procurement-service
+          - services/integration-service
+          - services/finance-service
+          - services/performance-service
+          - services/risk-service
+          - services/notification-service
+          - services/reporting-service
+          - services/logger-service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install (workspace root — npm workspaces tüm paketleri tek seferde kurar)
+        run: npm install
+      # Q (Day 11): "RLS testlerinin CI'a entegrasyonu" sırasında BULUNAN gerçek bir hata (bkz.
+      # CHANGELOG.md Day 11) — bu matris her workspace'i İZOLE bir job olarak çalıştırır, yani
+      # "shared" girdisinin kendi Build adımı, "services/project-service" gibi RUNTIME'DA
+      # `@pms/shared`'dan (ValidationError, NotFoundError vb.) değer import eden başka bir
+      # matris girdisinin dosya sistemine YANSIMAZ. Bugüne kadarki tüm "Doğrulama" notları yeşil
+      # çıktı çünkü YEREL doğrulama hep `npm run build --workspaces` İLE `test`TEN ÖNCE
+      # çalıştırıldı (bkz. CHANGELOG.md, ör. Day 10: "npm install && npm run build/test/lint") —
+      # ama gerçek CI'da (bu dosyada) her matris girdisinin adım sırası Lint→Test→Build'dir ve
+      # "shared" hiçbir zaman ayrı bir job'un dosya sistemine build edilmiş dist bırakmaz. Bu adım
+      # HER matris girdisi için (shared'ın kendisi dahil, idempotent ve zararsız) Lint/Test'ten
+      # ÖNCE `shared`'ı derler.
+      - name: Build shared (workspace bağımlılığı — @pms/shared'ı runtime'da import eden servisler için gerekli)
+        run: npm run build --workspace=shared --if-present
+      - name: Lint
+        run: cd ${{ matrix.workspace }} && npm run lint --if-present
+      - name: Test
+        run: cd ${{ matrix.workspace }} && npm run test --if-present
+      - name: Build
+        run: cd ${{ matrix.workspace }} && npm run build --if-present
+
+  # Q (Day 11): "RLS testlerinin CI'a entegrasyonu". tests/rls/*.rls.test.ts (Day 9'dan beri
+  # var, bkz. tests/rls/README.md) `describe.skipIf(!hasTestDb)` ile KENDİ KENDİNİ korur — bu
+  # yüzden aşağıdaki `integration-tests` job'unun aksine `if: false` İLE DEVRE DIŞI BIRAKILMADI:
+  # SUPABASE_TEST_URL/SUPABASE_TEST_ANON_KEY secret'ları repoya HENÜZ eklenmediği sürece bu iş
+  # sadece "5 dosya, 16 test, hepsi skip" ile yeşil geçer (bkz. `npm run test:rls` çıktısı);
+  # secret'lar go-live hazırlığında (roadmap.md Bölüm 16) eklendiği AN, hiçbir CI değişikliği
+  # gerekmeden gerçek RLS senaryoları çalışmaya başlar.
+  rls-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install (workspace root)
+        run: npm install
+      - name: RLS senaryolarını çalıştır (secret yoksa hepsi skip geçer)
+        run: npm run test:rls
+        env:
+          SUPABASE_TEST_URL: ${{ secrets.SUPABASE_TEST_URL }}
+          SUPABASE_TEST_ANON_KEY: ${{ secrets.SUPABASE_TEST_ANON_KEY }}
+
+  # Q (Day 12): "güvenlik taraması başlangıcı" — roadmap.md Bölüm 14.2'nin kendi ayrımı: bu SADECE
+  # başlangıç (Day 16 "tamamlama", Day 28 "ikinci tur", Day 43 "son doğrulama" ile devam eder,
+  # bkz. docs/security/audit-baseline.md). Bugünkü GERÇEK tarama 19 bulgu buldu (4 kritik, 7
+  # yüksek, 8 orta) — HEPSİ SemVer MAJOR sıçraması gerektiriyor (fastify/vitest/vite/bcrypt/
+  # nodemailer/react-router-dom dahil); bunları bugün, planlanmadan, `--force` ile düzeltmek RLS
+  # testlerini CI'a bağlarken (Day 11) bulunan hatadan çok daha riskli bir "sürpriz" olurdu.
+  # `continue-on-error: true` BİLİNÇLİ: bulgular her build'de GÖRÜNÜR olsun, ama hangi eşiğin
+  # pipeline'ı KIRACAĞI Day 16'nın kararı (bkz. audit-baseline.md'deki "CI politikası" notu).
+  # Day 16 (docs/security/audit-baseline.md, "Tamamlama"): Day 12'nin 19 bulgusunun (4 kritik,
+  # 7 yüksek, 8 orta) TAMAMI bugün düzeltildi (fastify 4->5, bcrypt 5->6, vitest 2->5, vite 5->8,
+  # nodemailer 6->10, node-cron 3->4, fast-xml-parser 4->5, react-router-dom 6->7 — hepsi SemVer
+  # MAJOR). `npm audit` artık SIFIR bulgu döndürüyor. Day 12'nin ertelediği eşik kararı: madem
+  # temiz durumdayız, `continue-on-error: true` KALDIRILDI — bu iş artık İLK YENİ bulguda
+  # pipeline'ı KIRAR (regresyonu önlemek asıl amaç; "bilinen ve plan dahilinde" bulgu artık yok,
+  # o yüzden görünür-ama-yumuşak politikanın gerekçesi de kalmadı). `--audit-level=moderate`
+  # eşiği (services/*/package.json'daki `security:audit` script'i) korunuyor.
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install (workspace root)
+        run: npm install
+      - name: Bağımlılık güvenlik taraması (npm audit — bulgular docs/security/audit-baseline.md'de izlenir)
+        run: npm run security:audit
+
+  # Q (Day 13, "yük testi — temel senaryo"): docs/testing/load-test-plan.md'nin Day 13 notu —
+  # bu iş GERÇEK bir yük testi ÇALIŞTIRMAZ (canlı Redis/RabbitMQ/Supabase gerektirir, CI'da
+  # yok, bkz. loadtest/README.md). Sadece `loadtest/scenarios/basic-scenario.mjs`'in KENDİ
+  # mantığını (summarize/compareRateLimiting) yerel bir stub sunucuya karşı doğrular — Day 8'in
+  # Playwright duman testiyle AYNI desen. Bu yüzden `integration-tests`'in aksine `if: false`
+  # DEĞİL: bu iş gerçekten her zaman geçmeli, `continue-on-error` da YOK (security-scan'den
+  # FARKLI olarak burada "henüz düzeltilmemiş bilinen bulgu" yok, sadece harness doğrulaması).
+  load-test-self-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install loadtest paketi (npm workspaces DIŞINDA — bkz. loadtest/package.json)
+        run: cd loadtest && npm install
+      - name: Harness self-test (gerçek backend'e dokunmaz — bkz. loadtest/README.md)
+        run: npm run test:load
+
+  # Q + Tüm Backend Ekip (Day 14, "tüm publisher → consumer event çiftlerinin uçtan uca
+  # doğrulanması"): load-test-self-check'ten (Day 13) FARKLI olarak bu iş GERÇEK bir RabbitMQ
+  # servis konteynerine karşı çalışır — docker-compose.yml'daki AYNI kimlik bilgileri
+  # (admin/secret). Bu kum havuzunda Docker olmadığı için RabbitMQ apt-get ile kurulup
+  # doğrudan çalıştırıldı; CI'da gerçek bir servis konteyneri kullanılabildiği için burada
+  # DAHA rahat/standart bir kurulum var. Sonuç (bkz. docs/testing/event-integration-audit.md):
+  # Kuyruk Haritası'nın 14 satırından sadece 5'i (project.created, assignment.created,
+  # material.purchased, audit.event, log.event) her iki tarafı da var VE test edilebilir
+  # durumda — geri kalanlar (en ciddisi: work_package.completed/project.completed'ın hiç
+  # üreticisi yok) `continue-on-error` GEREKTİRMİYOR çünkü bu iş sadece VAR OLAN 5 çifti test
+  # ediyor, eksik olanları "başarısız" saymıyor (onlar zaten audit belgesinde kayıtlı).
+  event-integration-tests:
+    runs-on: ubuntu-latest
+    services:
+      rabbitmq:
+        image: rabbitmq:3-management
+        ports: ["5672:5672"]
+        env:
+          RABBITMQ_DEFAULT_USER: admin
+          RABBITMQ_DEFAULT_PASS: secret
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install (workspace root)
+        run: npm install
+      - name: shared'ı build et (bu iş sadece kaynak servis dosyalarını import eder, ama @pms/shared derlenmiş olmalı)
+        run: npm run build --workspace=shared
+      - name: Gerçek RabbitMQ'ya karşı event çifti testleri (bkz. docs/testing/event-integration-audit.md)
+        run: npm run test:events
+        env:
+          RABBITMQ_URL: amqp://admin:secret@localhost:5672
+
+  # Q + Tüm Backend Ekip (Day 15, "Redis cache senkronizasyon testleri"): Day 14'ün
+  # event-integration-tests'inden FARKLI olarak bu iş İKİ gerçek servis konteynerine birden
+  # bağlanır — RabbitMQ (employee.created/updated teslimatı için) VE Redis (cache'in
+  # GERÇEKTEN doğru yazıldığını doğrulamak için). Day 14'ün denetimi `employee.updated`'ın hiç
+  # yazılmadığını bulmuştu (bkz. docs/testing/event-integration-audit.md) — bugün önce üretici
+  # (personnel-service: PATCH /employees/:id + employee.created/updated publisher'ları) ve 2
+  # tüketici (project-service, finance-service: Redis employee-cache) yazıldı, bu iş o zincirin
+  # UÇTAN UCA (gerçek broker + gerçek cache) çalıştığını kanıtlıyor (bkz.
+  # tests/cache/employee-changed.realtime.test.ts, 7 test).
+  cache-sync-tests:
+    runs-on: ubuntu-latest
+    services:
+      rabbitmq:
+        image: rabbitmq:3-management
+        ports: ["5672:5672"]
+        env:
+          RABBITMQ_DEFAULT_USER: admin
+          RABBITMQ_DEFAULT_PASS: secret
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install (workspace root)
+        run: npm install
+      - name: shared'ı build et (bu iş sadece kaynak servis dosyalarını import eder, ama @pms/shared derlenmiş olmalı)
+        run: npm run build --workspace=shared
+      - name: Gerçek RabbitMQ + Redis'e karşı cache senkronizasyon testleri
+        run: npm run test:cache
+        env:
+          RABBITMQ_URL: amqp://admin:secret@localhost:5672
+          REDIS_URL: redis://localhost:6379
+
+
+  # placeholder, staging Supabase kurulunca (Bölüm 16) aktifleşecek.
+  #
+  # Q (Day 8): "içi dolduruldu" — e2e/ paketi (Playwright) burada zaten referanslanıyor. `if: false`
+  # BİLİNÇLİ OLARAK kaldırılmadı: Playwright'ın gerçek bir web sunucusuna ihtiyacı var; Day 10'da
+  # gerçek bir E2E SENARYOSU eklendi (login-role-visibility.spec.ts — bkz. CHANGELOG.md Day 10 Q
+  # notu), bu yüzden alttaki not GÜNCELLENDİ (Day 11): artık 2 dosya / 4 test var (smoke.spec.ts +
+  # login-role-visibility.spec.ts), YİNE DE bu iş Day 18 Entegrasyon Haftası'na kadar KASITLI
+  # OLARAK devre dışı kalıyor (roadmap'in kendi planı, bkz. docs/roadmap.md Bölüm 14.5 — gerçek bir
+  # web sunucusu + Supabase ortamı olmadan CI'da çalıştırılamaz).
+  integration-tests:
+    runs-on: ubuntu-latest
+    if: false # Day 18 Entegrasyon Haftası'na kadar devre dışı (bkz. docs/roadmap.md Bölüm 14.5)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install (workspace root)
+        run: npm install
+      - name: Install Playwright + browsers
+        run: cd e2e && npm install && npx playwright install --with-deps chromium
+      - name: Run E2E tests
+        run: npm run test:e2e
