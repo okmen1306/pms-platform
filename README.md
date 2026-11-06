@@ -1,6 +1,6 @@
 # PMS Platform — Project Management System for R&D-driven manufacturers
 
-A microservice-based project management system built as a TypeScript monorepo: project and work-package planning,
+A modular, microservice-ready project management system built as a TypeScript monorepo: project and work-package planning,
 personnel, procurement and stock, R&D cost tracking, performance scoring, a risk register, notifications and reporting.
 It has a React frontend, a Supabase (PostgreSQL) database with row-level security, and event-driven communication between services.
 
@@ -56,6 +56,17 @@ api-gateway :3000  ── auth, routing, rate limiting
 
 **Ground rule:** a service never touches another service's tables directly. Services talk only via REST (sync) or
 RabbitMQ events + Redis (async / cache). Shared DTOs, event contracts and error types live in `shared/`.
+
+### Architecture decision: microservice-ready, not microservices on day one
+
+Each service is deployed on its own and owns its own tables, but all services share one Supabase (PostgreSQL) database for now.
+
+- **Why not full microservices yet:** a database per service brings distributed transactions, cross-service data
+  consistency and extra infrastructure to operate. At this stage that cost buys nothing.
+- **Why not a single monolith:** clear service boundaries, table ownership and event-driven communication keep the
+  modules independent, so work on one area never blocks another and the codebase stays easy to extend.
+- **How it scales:** when one area needs to scale on its own, its tables move to a dedicated database and the service is
+  split out. Nothing else changes, because no other service reads those tables directly.
 
 ## Repository layout
 
